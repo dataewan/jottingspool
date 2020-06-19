@@ -12,8 +12,12 @@ def has_children(el) -> bool:
         return False
 
 
-def is_link(el) -> bool:
-    return el.__class__ == mistletoe.span_token.Link
+def is_markdown_link(el) -> bool:
+    if el.__class__ == mistletoe.span_token.Link:
+        if ".md" in el.target:
+            # Ignoring anything that doesn't have the filetype markdown
+            return True
+    return False
 
 
 def get_children(el):
@@ -21,7 +25,7 @@ def get_children(el):
         for child in el.children:
             yield from get_children(child)
 
-    if is_link(el):
+    if is_markdown_link(el):
         yield el
 
 
@@ -38,12 +42,18 @@ def get_links_from_file(filename: str) -> List[mistletoe.span_token.Link]:
 
 
 def link_exists(link: mistletoe.span_token.Link) -> bool:
-    target = link.target
-    if "http" in target:
-        # Just assume that all remote links are okay
-        return True
-    else:
-        return os.path.exists(link.target)
+    return os.path.exists(link.target)
+
+
+def backlink_exists(filename: str,
+                    links: List[mistletoe.span_token.Link]) -> bool:
+    """Check if `links` contains a link that points back at `filename`.
+    """
+    for link in links:
+        if link.target == filename:
+            return True
+
+    return False
 
 
 def missing_links(links: List[mistletoe.span_token.Link]) -> List[str]:
@@ -56,6 +66,25 @@ def missing_links(links: List[mistletoe.span_token.Link]) -> List[str]:
 
     """
     return [link.target for link in links if not link_exists(link)]
+
+
+def missing_backlinks(filename: str,
+                      links: List[mistletoe.span_token.Link]) -> List[str]:
+    """Do all the files linked to in links have a corresponding backlink?
+
+    Args:
+    filename: name of the original file
+    links: all the links that are in that file
+
+    Returns: list of the missing backlinks
+    """
+    missing_backlinks = []
+    for link in links:
+        backlinks = get_links_from_file(link.target)
+        if not backlink_exists(filename, backlinks):
+            missing_backlinks.append(link.target)
+
+    return missing_backlinks
 
 
 def check_links_exist(filename: str):
@@ -71,6 +100,18 @@ def check_links_exist(filename: str):
     return missing_links(links)
 
 
+def check_backlinks_exist(filename: str):
+    """Check that files that this links to, also have a corresponding backlink
+
+    Args:
+    filename: file to get the links from
+
+    Returns: missing backlinks
+    """
+    links = get_links_from_file(filename)
+    return missing_backlinks(filename, links)
+
+
 def file_or_dir(filename: str) -> List[str]:
     """Deal with both files and directories.
     If this is a file then just return that individual markodwn file.
@@ -84,9 +125,13 @@ def file_or_dir(filename: str) -> List[str]:
 
 def check_files(files: List[str]):
     for file in files:
-        missing_links = check_links_exist(file)
-        if len(missing_links) > 0:
-            print("Missing link", file, missing_links)
+        links = check_links_exist(file)
+        backlinks = check_backlinks_exist(file)
+        if len(links) > 0:
+            print("Missing link", file, links)
+
+        if len(backlinks) > 0:
+            print("Missing backlink", file, backlinks)
 
 
 if __name__ == "__main__":

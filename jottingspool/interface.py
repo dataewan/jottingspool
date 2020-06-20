@@ -51,11 +51,14 @@ class Interface(object):
     def ask_user_about_missing(self, check: files.FileInformation,
                                missing_reference: str) -> bool:
         prompt = f"{check.filepath} references missing file {missing_reference}, create it?(yN) "
-        input = self.c.input(prompt)
-        return self.check_input_default_no(input)
+        return self.check_input_default_no(prompt)
+
+    def check_input_default_no(self, prompt: str) -> bool:
+        userinput = self.c.input(prompt)
+        return self.user_input_default_no_logic(userinput)
 
     @staticmethod
-    def check_input_default_no(userinput: str) -> bool:
+    def user_input_default_no_logic(userinput: str) -> bool:
         if userinput == "":
             return False
         if userinput.lower()[0] == "y":
@@ -66,18 +69,15 @@ class Interface(object):
     def ask_user_about_backlink(self, checked_file: files.FileInformation,
                                 missing_backlink: str):
         prompt = f"{checked_file.filepath} is referenced by {missing_backlink}.\nShould I add the link in at the end of {missing_backlink}? (yN)"
-        input = self.c.input(prompt)
-        should_add_link = self.check_input_default_no(input)
+        should_add_link = self.check_input_default_no(prompt)
         if should_add_link:
             self.c.print(
                 f"Adding a link to {checked_file.filepath} from {missing_backlink}"
             )
         if not should_add_link:
             prompt = f"Would you like to ignore this warning in future? (yN)"
-            input = self.c.input(prompt)
-            should_add_ignore = self.check_input_default_no(input)
+            should_add_ignore = self.check_input_default_no(prompt)
             if should_add_ignore:
                 self.c.print(
                     f"Ignoring missing link to {checked_file.filepath} from {missing_backlink}"
                 )
-

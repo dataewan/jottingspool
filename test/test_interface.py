@@ -11,16 +11,16 @@ fi_missing_nothing = FileInformation("./test.md", [], [])
 
 
 def test_check_user_input_default_n():
-    assert interface.check_input_default_no("y") == True
-    assert interface.check_input_default_no("Y") == True
-    assert interface.check_input_default_no("yes") == True
-    assert interface.check_input_default_no("yup") == True
+    assert interface.user_input_default_no_logic("y") == True
+    assert interface.user_input_default_no_logic("Y") == True
+    assert interface.user_input_default_no_logic("yes") == True
+    assert interface.user_input_default_no_logic("yup") == True
 
-    assert interface.check_input_default_no("n") == False
-    assert interface.check_input_default_no("w") == False
-    assert interface.check_input_default_no("no") == False
-    assert interface.check_input_default_no("N") == False
-    assert interface.check_input_default_no("") == False
+    assert interface.user_input_default_no_logic("n") == False
+    assert interface.user_input_default_no_logic("w") == False
+    assert interface.user_input_default_no_logic("no") == False
+    assert interface.user_input_default_no_logic("N") == False
+    assert interface.user_input_default_no_logic("") == False
 
 
 def test_check_missing_reference():

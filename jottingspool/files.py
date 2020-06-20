@@ -33,13 +33,16 @@ def check_files(files: List[str]) -> List[FileInformation]:
     return checks
 
 
-def correct_missing(fileinfo: FileInformation, placeholder: str = "TODO"):
+def correct_missing(fileinfo: FileInformation,
+                    missing_reference: str,
+                    placeholder: str = "TODO"):
     """Creates missing files.
 
     args:
     fileinfo: summary of the file
+    missing_reference: file reference that is missing
     placeholder: text to create in the new file
     """
-    for missing_file in fileinfo.missinglinks:
-        with open(missing_file, "w") as f:
+    if not os.path.exists(missing_reference):
+        with open(missing_reference, "w") as f:
             f.write(placeholder)

@@ -1,8 +1,6 @@
 import mistletoe
-import sys
 from typing import List
 import os
-import glob
 
 
 def has_children(el) -> bool:
@@ -36,9 +34,13 @@ def extract_links(markdowntext: str) -> List[mistletoe.span_token.Link]:
 
 
 def get_links_from_file(filename: str) -> List[mistletoe.span_token.Link]:
-    with open(filename, "r") as f:
-        text = f.read()
-        return extract_links(text)
+    if os.path.exists(filename):
+        with open(filename, "r") as f:
+            text = f.read()
+            return extract_links(text)
+    else:
+        # There are no links in an empty file
+        return []
 
 
 def link_exists(link: mistletoe.span_token.Link) -> bool:
@@ -87,7 +89,7 @@ def missing_backlinks(filename: str,
     return missing_backlinks
 
 
-def check_links_exist(filename: str):
+def check_links_exist(filename: str) -> List[str]:
     """Check that all the links in the file actually exist.
 
     Args:
@@ -100,7 +102,7 @@ def check_links_exist(filename: str):
     return missing_links(links)
 
 
-def check_backlinks_exist(filename: str):
+def check_backlinks_exist(filename: str) -> List[str]:
     """Check that files that this links to, also have a corresponding backlink
 
     Args:
@@ -110,30 +112,3 @@ def check_backlinks_exist(filename: str):
     """
     links = get_links_from_file(filename)
     return missing_backlinks(filename, links)
-
-
-def file_or_dir(filename: str) -> List[str]:
-    """Deal with both files and directories.
-    If this is a file then just return that individual markodwn file.
-    If it is a dir, then return all markdown files in that directory.
-    """
-    if os.path.isdir(filename):
-        return glob.glob(os.path.join(filename, "*.md"))
-    else:
-        return [filename]
-
-
-def check_files(files: List[str]):
-    for file in files:
-        links = check_links_exist(file)
-        backlinks = check_backlinks_exist(file)
-        if len(links) > 0:
-            print("Missing link", file, links)
-
-        if len(backlinks) > 0:
-            print("Missing backlink", file, backlinks)
-
-
-if __name__ == "__main__":
-    files = file_or_dir(sys.argv[1])
-    check_files(files)

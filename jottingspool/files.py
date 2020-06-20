@@ -46,3 +46,17 @@ def correct_missing(fileinfo: FileInformation,
     if not os.path.exists(missing_reference):
         with open(missing_reference, "w") as f:
             f.write(placeholder)
+
+
+def add_missing_backlink(fileinfo: FileInformation,
+                         missing_backlink: str,
+                         placeholder: str = "TODO"):
+    """Adds a reference to fileinfo at the bottom of the `missing_backlink` file.
+
+    args:
+    fileinfo: file that's to be referenced
+    missing_backlink: file to add the link into
+    placeholder: text to use for the link anchor
+    """
+    with open(missing_backlink, "a") as f:
+        f.write(f"\n[{placeholder}]({fileinfo.filepath})")

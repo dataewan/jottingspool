@@ -71,9 +71,7 @@ class Interface(object):
         prompt = f"{checked_file.filepath} is referenced by {missing_backlink}.\nShould I add the link in at the end of {missing_backlink}? (yN)"
         should_add_link = self.check_input_default_no(prompt)
         if should_add_link:
-            self.c.print(
-                f"Adding a link to {checked_file.filepath} from {missing_backlink}"
-            )
+            files.add_missing_backlink(checked_file, missing_backlink)
         if not should_add_link:
             prompt = f"Would you like to ignore this warning in future? (yN)"
             should_add_ignore = self.check_input_default_no(prompt)

@@ -20,6 +20,7 @@ def test_check_user_input_default_n():
     assert interface.check_input_default_no("w") == False
     assert interface.check_input_default_no("no") == False
     assert interface.check_input_default_no("N") == False
+    assert interface.check_input_default_no("") == False
 
 
 def test_check_missing_reference():

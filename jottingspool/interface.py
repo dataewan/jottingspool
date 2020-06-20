@@ -56,6 +56,8 @@ class Interface(object):
 
     @staticmethod
     def check_input_default_no(userinput: str) -> bool:
+        if userinput == "":
+            return False
         if userinput.lower()[0] == "y":
             return True
         else:

@@ -1,8 +1,11 @@
-from typing import List
+from typing import List, Tuple
 import os
 import glob
 from dataclasses import dataclass
 from . import links
+import json
+
+IGNORES_FILENAME = ".ignore.json"
 
 
 @dataclass
@@ -12,15 +15,28 @@ class FileInformation:
     missingbacklinks: List[str]
 
 
-def file_or_dir(filename: str) -> List[str]:
+@dataclass
+class BacklinkIgnores:
+    referenced_file: str
+    backlink_path: str
+
+
+def file_or_dir(filename: str) -> Tuple[str, List[str]]:
     """Deal with both files and directories.
     If this is a file then just return that individual markdown file.
     If it is a dir, then return all markdown files in that directory.
+
+    Returns:
+    (
+        basedirectory: the directory that all the files live in
+        files: the paths of all the files
+    )
     """
     if os.path.isdir(filename):
-        return glob.glob(os.path.join(filename, "*.md"))
+        return filename, glob.glob(os.path.join(filename, "*.md"))
     else:
-        return [filename]
+        directory = os.path.dirname(filename)
+        return directory, [filename]
 
 
 def check_files(files: List[str]) -> List[FileInformation]:
@@ -60,3 +76,34 @@ def add_missing_backlink(fileinfo: FileInformation,
     """
     with open(missing_backlink, "a") as f:
         f.write(f"\n[{placeholder}]({fileinfo.filepath})")
+
+
+def get_ignores_filename(directory: str) -> str:
+    """Figure out the ignores filename,
+    args:
+    directory: base directory
+    """
+    return os.path.join(directory, IGNORES_FILENAME)
+
+
+def read_ignores(directory: str) -> List[BacklinkIgnores]:
+    ignores_filename = get_ignores_filename(directory)
+    if os.path.exists(ignores_filename):
+        with open(ignores_filename, "r") as f:
+            ignores = [
+                BacklinkIgnores(referenced_file=i[0], backlink_path=i[1])
+                for i in json.load(f)
+            ]
+
+    else:
+        ignores = []
+
+    return ignores
+
+
+def write_ignores(directory: str, ignores: List[BacklinkIgnores]):
+    ignores_filename = get_ignores_filename(directory)
+    with open(ignores_filename, "w") as f:
+        ignore_serialisable = [(ignore.referenced_file, ignore.backlink_path)
+                               for ignore in ignores]
+        json.dump(ignore_serialisable, f, indent=2)

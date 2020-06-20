@@ -5,20 +5,27 @@ from jottingspool import files
 class Interface(object):
     """User interface for knowledge repository"""
     def __init__(self, path: str):
-        """TODO: to be defined.
-
+        """
+        Setup
+        
         Args:
+        path: either a markdown file or a directory containing markdown files.
         """
         self.path = path
         self.c = Console()
 
     def run(self):
         self.find_files()
+        self.get_ignores()
         self.check_files()
         self.correct_files()
+        self.write_ignores()
 
     def find_files(self):
-        self.markdown_files = files.file_or_dir(self.path)
+        self.directory, self.markdown_files = files.file_or_dir(self.path)
+
+    def get_ignores(self):
+        self.ignores = files.read_ignores(self.directory)
 
     def check_files(self):
         self.checks = files.check_files(self.markdown_files)
@@ -27,6 +34,9 @@ class Interface(object):
         for check in self.checks:
             self.create_missing(check)
             self.create_backlinks(check)
+
+    def write_ignores(self):
+        files.write_ignores(self.directory, self.ignores)
 
     def create_missing(self, checked_file: files.FileInformation):
         if self.is_missing(checked_file):
@@ -38,7 +48,14 @@ class Interface(object):
     def create_backlinks(self, checked_file: files.FileInformation):
         if self.has_missing_backlinks(checked_file):
             for missing_backlink in checked_file.missingbacklinks:
-                self.ask_user_about_backlink(checked_file, missing_backlink)
+                backlink_ignore_description = files.BacklinkIgnores(
+                    referenced_file=checked_file.filepath,
+                    backlink_path=missing_backlink)
+                if not self.should_ignore_backlink(
+                        backlink_ignore_description):
+                    self.ask_user_about_backlink(checked_file,
+                                                 missing_backlink,
+                                                 backlink_ignore_description)
 
     @staticmethod
     def is_missing(check: files.FileInformation) -> bool:
@@ -66,8 +83,13 @@ class Interface(object):
         else:
             return False
 
-    def ask_user_about_backlink(self, checked_file: files.FileInformation,
-                                missing_backlink: str):
+    def should_ignore_backlink(
+            self, backlink_ignore_description: files.BacklinkIgnores) -> bool:
+        return backlink_ignore_description in self.ignores
+
+    def ask_user_about_backlink(
+            self, checked_file: files.FileInformation, missing_backlink: str,
+            backlink_ignore_description: files.BacklinkIgnores):
         prompt = f"{checked_file.filepath} is referenced by {missing_backlink}.\nShould I add the link in at the end of {missing_backlink}? (yN)"
         should_add_link = self.check_input_default_no(prompt)
         if should_add_link:
@@ -76,6 +98,4 @@ class Interface(object):
             prompt = f"Would you like to ignore this warning in future? (yN)"
             should_add_ignore = self.check_input_default_no(prompt)
             if should_add_ignore:
-                self.c.print(
-                    f"Ignoring missing link to {checked_file.filepath} from {missing_backlink}"
-                )
+                self.ignores.append(backlink_ignore_description)

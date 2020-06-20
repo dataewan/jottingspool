@@ -1,5 +1,5 @@
 from jottingspool.interface import Interface
-from jottingspool.files import FileInformation
+from jottingspool.files import FileInformation, BacklinkIgnores
 
 interface = Interface("")
 
@@ -28,3 +28,13 @@ def test_check_missing_reference():
     assert interface.is_missing(fi_missing_just_reference) == True
     assert interface.is_missing(fi_missing_just_backlink) == False
     assert interface.is_missing(fi_missing_nothing) == False
+
+
+def test_should_ignore_backlink():
+    interface.ignores = []
+    backlink_example = BacklinkIgnores(referenced_file="a", backlink_path="b")
+    assert interface.should_ignore_backlink(backlink_example) == False
+
+    interface.ignores = [backlink_example]
+    assert interface.should_ignore_backlink(backlink_example) == True
+

@@ -49,9 +49,9 @@ def check_files(files: List[str]) -> List[FileInformation]:
     return checks
 
 
-def correct_missing(fileinfo: FileInformation,
-                    missing_reference: str,
-                    placeholder: str = "TODO"):
+def correct_missing(
+    fileinfo: FileInformation, missing_reference: str, placeholder: str = "TODO"
+):
     """Creates missing files.
 
     args:
@@ -64,9 +64,9 @@ def correct_missing(fileinfo: FileInformation,
             f.write(placeholder)
 
 
-def add_missing_backlink(fileinfo: FileInformation,
-                         missing_backlink: str,
-                         placeholder: str = "TODO"):
+def add_missing_backlink(
+    fileinfo: FileInformation, missing_backlink: str, placeholder: str = "TODO"
+):
     """Adds a reference to fileinfo at the bottom of the `missing_backlink` file.
 
     args:
@@ -104,6 +104,7 @@ def read_ignores(directory: str) -> List[BacklinkIgnores]:
 def write_ignores(directory: str, ignores: List[BacklinkIgnores]):
     ignores_filename = get_ignores_filename(directory)
     with open(ignores_filename, "w") as f:
-        ignore_serialisable = [(ignore.referenced_file, ignore.backlink_path)
-                               for ignore in ignores]
+        ignore_serialisable = [
+            (ignore.referenced_file, ignore.backlink_path) for ignore in ignores
+        ]
         json.dump(ignore_serialisable, f, indent=2)

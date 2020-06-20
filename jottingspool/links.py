@@ -47,8 +47,7 @@ def link_exists(link: mistletoe.span_token.Link) -> bool:
     return os.path.exists(link.target)
 
 
-def backlink_exists(filename: str,
-                    links: List[mistletoe.span_token.Link]) -> bool:
+def backlink_exists(filename: str, links: List[mistletoe.span_token.Link]) -> bool:
     """Check if `links` contains a link that points back at `filename`.
     """
     for link in links:
@@ -70,8 +69,9 @@ def missing_links(links: List[mistletoe.span_token.Link]) -> List[str]:
     return [link.target for link in links if not link_exists(link)]
 
 
-def missing_backlinks(filename: str,
-                      links: List[mistletoe.span_token.Link]) -> List[str]:
+def missing_backlinks(
+    filename: str, links: List[mistletoe.span_token.Link]
+) -> List[str]:
     """Do all the files linked to in links have a corresponding backlink?
 
     Args:

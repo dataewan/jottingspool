@@ -4,6 +4,7 @@ from jottingspool import files
 
 class Interface(object):
     """User interface for knowledge repository"""
+
     def __init__(self, path: str):
         """
         Setup
@@ -41,8 +42,7 @@ class Interface(object):
     def create_missing(self, checked_file: files.FileInformation):
         if self.is_missing(checked_file):
             for missing_reference in checked_file.missinglinks:
-                if self.ask_user_about_missing(checked_file,
-                                               missing_reference):
+                if self.ask_user_about_missing(checked_file, missing_reference):
                     files.correct_missing(checked_file, missing_reference)
 
     def create_backlinks(self, checked_file: files.FileInformation):
@@ -50,12 +50,12 @@ class Interface(object):
             for missing_backlink in checked_file.missingbacklinks:
                 backlink_ignore_description = files.BacklinkIgnores(
                     referenced_file=checked_file.filepath,
-                    backlink_path=missing_backlink)
-                if not self.should_ignore_backlink(
-                        backlink_ignore_description):
-                    self.ask_user_about_backlink(checked_file,
-                                                 missing_backlink,
-                                                 backlink_ignore_description)
+                    backlink_path=missing_backlink,
+                )
+                if not self.should_ignore_backlink(backlink_ignore_description):
+                    self.ask_user_about_backlink(
+                        checked_file, missing_backlink, backlink_ignore_description
+                    )
 
     @staticmethod
     def is_missing(check: files.FileInformation) -> bool:
@@ -65,11 +65,13 @@ class Interface(object):
     def has_missing_backlinks(checked_file: files.FileInformation) -> bool:
         return len(checked_file.missingbacklinks) > 0
 
-    def ask_user_about_missing(self, check: files.FileInformation,
-                               missing_reference: str) -> bool:
+    def ask_user_about_missing(
+        self, check: files.FileInformation, missing_reference: str
+    ) -> bool:
         prompt = (
             f"[green]{check.filepath}[/green] references missing file [green]{missing_reference}[/green]"
-            "create it?(y[bold]N[/bold]) ")
+            "create it?(y[bold]N[/bold]) "
+        )
         return self.check_input_default_no(prompt)
 
     def check_input_default_no(self, prompt: str) -> bool:
@@ -86,12 +88,16 @@ class Interface(object):
             return False
 
     def should_ignore_backlink(
-            self, backlink_ignore_description: files.BacklinkIgnores) -> bool:
+        self, backlink_ignore_description: files.BacklinkIgnores
+    ) -> bool:
         return backlink_ignore_description in self.ignores
 
     def ask_user_about_backlink(
-            self, checked_file: files.FileInformation, missing_backlink: str,
-            backlink_ignore_description: files.BacklinkIgnores):
+        self,
+        checked_file: files.FileInformation,
+        missing_backlink: str,
+        backlink_ignore_description: files.BacklinkIgnores,
+    ):
         prompt = (
             f"[green]{checked_file.filepath}[/green] is referenced by [green]{missing_backlink}[/green]. "
             f"Should I add the link in at the end of {missing_backlink}? (y[bold]N[/bold]) "
@@ -100,11 +106,11 @@ class Interface(object):
         if should_add_link:
             files.add_missing_backlink(checked_file, missing_backlink)
         if not should_add_link:
-            prompt = f"Would you like to ignore this warning in future? (y[bold]N[/bold]) "
+            prompt = (
+                f"Would you like to ignore this warning in future? (y[bold]N[/bold]) "
+            )
             if self.check_input_default_no(prompt):
                 self.append_ignore(backlink_ignore_description)
 
-    def append_ignore(self,
-                      backlink_ignore_description: files.BacklinkIgnores):
+    def append_ignore(self, backlink_ignore_description: files.BacklinkIgnores):
         self.ignores.append(backlink_ignore_description)
-

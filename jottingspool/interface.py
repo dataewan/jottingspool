@@ -13,7 +13,6 @@ class Interface(object):
         self.c = Console()
 
     def run(self):
-        self.summary = []
         self.find_files()
         self.check_files()
         self.correct_files()
@@ -37,12 +36,17 @@ class Interface(object):
                     files.correct_missing(checked_file, missing_reference)
 
     def create_backlinks(self, checked_file: files.FileInformation):
-        # TODO
-        pass
+        if self.has_missing_backlinks(checked_file):
+            for missing_backlink in checked_file.missingbacklinks:
+                self.ask_user_about_backlink(checked_file, missing_backlink)
 
     @staticmethod
     def is_missing(check: files.FileInformation) -> bool:
         return len(check.missinglinks) > 0
+
+    @staticmethod
+    def has_missing_backlinks(checked_file: files.FileInformation) -> bool:
+        return len(checked_file.missingbacklinks) > 0
 
     def ask_user_about_missing(self, check: files.FileInformation,
                                missing_reference: str) -> bool:
@@ -56,3 +60,22 @@ class Interface(object):
             return True
         else:
             return False
+
+    def ask_user_about_backlink(self, checked_file: files.FileInformation,
+                                missing_backlink: str):
+        prompt = f"{checked_file.filepath} is referenced by {missing_backlink}.\nShould I add the link in at the end of {missing_backlink}? (yN)"
+        input = self.c.input(prompt)
+        should_add_link = self.check_input_default_no(input)
+        if should_add_link:
+            self.c.print(
+                f"Adding a link to {checked_file.filepath} from {missing_backlink}"
+            )
+        if not should_add_link:
+            prompt = f"Would you like to ignore this warning in future? (yN)"
+            input = self.c.input(prompt)
+            should_add_ignore = self.check_input_default_no(input)
+            if should_add_ignore:
+                self.c.print(
+                    f"Ignoring missing link to {checked_file.filepath} from {missing_backlink}"
+                )
+

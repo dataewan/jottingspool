@@ -82,9 +82,10 @@ def missing_backlinks(
     """
     missing_backlinks = []
     for link in links:
-        backlinks = get_links_from_file(link.target)
-        if not backlink_exists(filename, backlinks):
-            missing_backlinks.append(link.target)
+        if os.path.exists(link.target):
+            backlinks = get_links_from_file(link.target)
+            if not backlink_exists(filename, backlinks):
+                missing_backlinks.append(link.target)
 
     return missing_backlinks
 

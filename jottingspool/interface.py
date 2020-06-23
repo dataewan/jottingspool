@@ -1,5 +1,6 @@
 from rich.console import Console
 from jottingspool import files
+import sys
 
 
 class Interface(object):
@@ -114,3 +115,16 @@ class Interface(object):
 
     def append_ignore(self, backlink_ignore_description: files.BacklinkIgnores):
         self.ignores.append(backlink_ignore_description)
+
+
+def command_line():
+    if len(sys.argv) == 2:
+        i = Interface(sys.argv[1])
+    elif len(sys.argv) == 1:
+        i = Interface(".")
+    else:
+        raise ValueError(
+            "Specify a file or directory, leave blank for the current directory"
+        )
+
+    i.run()

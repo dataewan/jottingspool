@@ -71,7 +71,7 @@ class Interface(object):
     ) -> bool:
         prompt = (
             f"[green]{check.filepath}[/green] references missing file [green]{missing_reference}[/green]"
-            "create it?(y[bold]N[/bold]) "
+            " create it? (y[bold]N[/bold]) "
         )
         return self.check_input_default_no(prompt)
 
@@ -100,7 +100,7 @@ class Interface(object):
         backlink_ignore_description: files.BacklinkIgnores,
     ):
         prompt = (
-            f"[green]{checked_file.filepath}[/green] is referenced by [green]{missing_backlink}[/green]. "
+            f"[green]{missing_backlink}[/green] is referenced by [green]{checked_file.filepath}[/green]. "
             f"Should I add the link in at the end of {missing_backlink}? (y[bold]N[/bold]) "
         )
         should_add_link = self.check_input_default_no(prompt)

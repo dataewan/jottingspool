@@ -37,7 +37,7 @@ def get_links_from_file(filename: str) -> List[mistletoe.span_token.Link]:
     if os.path.exists(filename):
         with open(filename, "r") as f:
             text = f.read()
-            return extract_links(text)
+            return list(set(extract_links(text)))
     else:
         # There are no links in an empty file
         return []
@@ -47,11 +47,19 @@ def link_exists(link: mistletoe.span_token.Link) -> bool:
     return os.path.exists(link.target)
 
 
+def links_are_the_same(link1: str, link2: str) -> bool:
+    """Check if the two links are equivalent to each other. 
+    More than simple string equality because you can reference paths in
+    multiple ways.
+    """
+    return os.path.realpath(link1) == os.path.realpath(link2)
+
+
 def backlink_exists(filename: str, links: List[mistletoe.span_token.Link]) -> bool:
     """Check if `links` contains a link that points back at `filename`.
     """
     for link in links:
-        if link.target == filename:
+        if links_are_the_same(link.target, filename):
             return True
 
     return False

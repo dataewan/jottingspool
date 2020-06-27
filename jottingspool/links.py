@@ -1,6 +1,7 @@
 import mistletoe
 from typing import List
 import os
+from collections import OrderedDict
 
 
 def has_children(el) -> bool:
@@ -37,7 +38,8 @@ def get_links_from_file(filename: str) -> List[mistletoe.span_token.Link]:
     if os.path.exists(filename):
         with open(filename, "r") as f:
             text = f.read()
-            return list(set(extract_links(text)))
+            links = extract_links(text)
+            return list(OrderedDict.fromkeys(links))
     else:
         # There are no links in an empty file
         return []

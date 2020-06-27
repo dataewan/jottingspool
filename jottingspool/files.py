@@ -64,8 +64,21 @@ def correct_missing(
             f.write(placeholder)
 
 
+def pretty_link_name(fileinfo: FileInformation) -> str:
+    """Make a nicer link title from a file path
+    args:
+    fileinfo: file to transform
+    returns:
+    nice looking link name.
+    """
+    filepath = fileinfo.filepath
+    filepath = os.path.basename(os.path.normpath(filepath))
+    filepath = filepath.replace(".md", "")
+    return filepath
+
+
 def add_missing_backlink(
-    fileinfo: FileInformation, missing_backlink: str, placeholder: str = "TODO"
+    fileinfo: FileInformation, missing_backlink: str, placeholder: str = None
 ):
     """Adds a reference to fileinfo at the bottom of the `missing_backlink` file.
 
@@ -74,6 +87,8 @@ def add_missing_backlink(
     missing_backlink: file to add the link into
     placeholder: text to use for the link anchor
     """
+    if placeholder is None:
+        placeholder = pretty_link_name(fileinfo)
     with open(missing_backlink, "a") as f:
         f.write(f"\n[{placeholder}]({fileinfo.filepath})")
 
